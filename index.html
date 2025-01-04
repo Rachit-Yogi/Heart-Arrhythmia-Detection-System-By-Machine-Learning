@@ -1,0 +1,357 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Predictive ECG Analysis</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap">
+    <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f0f3f6;
+            --text-color: #333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        header.scrolled {
+            padding: 10px 0;
+            background-color: rgba(255, 255, 255, 0.9);
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+        }
+
+        .highlight {
+            color: var(--secondary-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-weight: 600;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary-color);
+        }
+
+        section {
+            padding: 100px 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        #upload {
+            background: linear-gradient(135deg, #3498db, #2ecc71);
+        }
+
+        #ecgForm {
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 500px;
+            width: 100%;
+        }
+
+        #ecgForm input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: var(--primary-color);
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .btn:hover {
+            background-color: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        #results {
+            background-color: #fff;
+        }
+
+        .results-box {
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+
+        .results-box.show {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .no-data {
+            text-align: center;
+            color: #777;
+        }
+
+        .error {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        #charts {
+            margin-top: 50px;
+        }
+
+        #charts h3, #charts h4 {
+            margin-bottom: 20px;
+        }
+
+        #charts img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+            }
+
+            nav ul {
+                margin-top: 20px;
+            }
+
+            nav ul li {
+                margin: 0 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>ECG <span class="highlight">Analysis Dashboard</span></h1>
+            <nav>
+                <ul>
+                    <li><a href="#upload">Upload ECG</a></li>
+                    <li><a href="#results">View Results</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="upload">
+        <div class="container">
+            <form id="ecgForm">
+                <h2>Upload Your ECG Data</h2>
+                <input type="file" id="ecgData" name="ecgData" required>
+                <button type="submit" class="btn pulse">Analyze</button>
+            </form>
+        </div>
+    </section>
+
+    <section id="results">
+        <div class="container">
+            <h2>Analysis Results</h2>
+            <div id="analysis" class="results-box">
+                <p class="no-data">No data analyzed yet. Upload an ECG file to view the results.</p>
+            </div>
+            <div id="charts" style="display: none;">
+                <h3>Visualization of Results</h3>
+                <h4>Risk Score Distribution</h4>
+                <img id="riskScoresChart" src="" alt="Risk Scores Chart">
+                <h4>Model Confidence Levels</h4>
+                <img id="confidenceLevelsChart" src="" alt="Confidence Levels Chart">
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Form submission and results display
+        document.getElementById("ecgForm").addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            var formData = new FormData();
+            var fileInput = document.getElementById("ecgData");
+            formData.append("ecgData", fileInput.files[0]);
+
+            // Show loading animation
+            document.getElementById("analysis").innerHTML = '<p class="no-data">Analyzing ECG data...</p>';
+            document.getElementById("analysis").classList.add('show');
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    document.getElementById("analysis").innerHTML = `<p class="error">${data.error}</p>`;
+                } else {
+                    let resultsHTML = "<h3>Analysis Report</h3>";
+                    data.report.forEach((item, index) => {
+                        resultsHTML += `
+                            <div class="result-item" style="animation: fadeIn 0.5s ${index * 0.1}s both;">
+                                <p><strong>Arrhythmia Type:</strong> ${item["Arrhythmia Type"]}</p>
+                                <p><strong>Risk Score:</strong> ${item["Risk Score"]}</p>
+                                <p><strong>Model Confidence:</strong> ${item["Model Confidence"]}</p>
+                                <p><strong>Precautions:</strong> ${item["Precautions"]}</p>
+                                <hr>
+                            </div>
+                        `;
+                    });
+                    document.getElementById("analysis").innerHTML = resultsHTML;
+
+                    // Update chart images with fade-in effect
+                    const riskScoresChart = document.getElementById("riskScoresChart");
+                    const confidenceLevelsChart = document.getElementById("confidenceLevelsChart");
+
+                    riskScoresChart.style.opacity = 0;
+                    confidenceLevelsChart.style.opacity = 0;
+
+                    riskScoresChart.src = "data:image/png;base64," + data.charts.risk_scores_chart;
+                    confidenceLevelsChart.src = "data:image/png;base64," + data.charts.confidence_levels_chart;
+
+                    setTimeout(() => {
+                        riskScoresChart.style.transition = "opacity 1s ease-in-out";
+                        confidenceLevelsChart.style.transition = "opacity 1s ease-in-out";
+                        riskScoresChart.style.opacity = 1;
+                        confidenceLevelsChart.style.opacity = 1;
+                    }, 100);
+
+                    // Show the charts section with a slide-down effect
+                    const chartsSection = document.getElementById("charts");
+                    chartsSection.style.display = "block";
+                    chartsSection.style.maxHeight = "0px";
+                    chartsSection.style.overflow = "hidden";
+                    chartsSection.style.transition = "max-height 1s ease-in-out";
+                    setTimeout(() => {
+                        chartsSection.style.maxHeight = chartsSection.scrollHeight + "px";
+                    }, 100);
+                }
+            })
+            .catch(error => {
+                document.getElementById("analysis").innerHTML = `<p class="error">An error occurred while processing the file.</p>`;
+            });
+        });
+
+        // Intersection Observer for fade-in effect
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('show');
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.results-box').forEach(box => {
+            observer.observe(box);
+        });
+    </script>
+</body>
+</html>
